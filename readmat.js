@@ -182,14 +182,28 @@ function readMat(data) {
 				return read;
 
 			case 16: // utf8
-				throw new BadFormatException(index, "Data element's type is 16, 'UTF8' (unsupported)");
+				var arr = "";
+				for (var i = 0; i < length; i++) {
+					arr += String.fromCodePoint(view.getInt8(index + taglength + i));
+				}
+				read.data = arr
+				return read;
 
 			case 17: // utf16
-				throw new BadFormatException(index, "Data element's type is 17, 'UTF16' (unsupported)");
-
+				var arr = "";
+				for (var i = 0; i < length; i++) {
+					arr += String.fromCodePoint(view.getInt16(index + taglength + i, en));
+				}
+				read.data = arr
+				return read;
 			case 18: // utf32
-			  // TODO: String.fromCodePoint()
-				throw new BadFormatException(index, "Data element's type is 18, 'UTF32' (unsupported)");
+				var arr = "";
+				for (var i = 0; i < length; i++) {
+					arr += String.fromCodePoint(view.getInt32(index + taglength + i, en));
+				}
+				read.data = arr
+				return read;
+
 		}
 	}
 
