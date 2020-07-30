@@ -121,6 +121,7 @@ function readMat(data) {
 				}
 				reader += nameArr.length;
 
+				// Arr data
 				var arrData;
 				switch (mxClass) {
 					case 1: // Cell array
@@ -156,14 +157,14 @@ function readMat(data) {
 					case 12: // 32-bit, signed integer
 					case 13: // 32-bit, unsigned integer
 						if (realFlag) {
-							var realArr = readDataElem(data, reader);
-							reader += realArr.length;
-							var imgArr = readDataElem(data, reader);
-							reader += imgArr.length;
+							var pr = readDataElem(data, reader);
+							reader += pr.length;
+							var ir = readDataElem(data, reader);
+							reader += ir.length;
 
 							arrData = [];
-							for (var i = 0; i < imgArr.data.length; i++) {
-								arrData.push({ r: realArr.data[i], i: imgArr.data[i] });
+							for (var i = 0; i < ir.data.length; i++) {
+								arrData.push({ r: pr.data[i], i: ir.data[i] });
 							}
 						} else {
 							arrData = readDataElem(data, reader);
@@ -178,7 +179,6 @@ function readMat(data) {
 						throw new BadFormatException(index, "Array's type is " + mxClass + " (unknown)");
 				}
 
-				// Array data
 				function iterateN(size, flat) {
 					var d = 0;
 					var n = 0;
