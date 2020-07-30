@@ -26,5 +26,7 @@ Named arrays within arrays lose their names.
 
 Matlab likes to use flat but 2D arrays (e.g. 1x3). These are not unboxed and stay as `[[1, 2, 3]]`. To support actually multi-dimensional character arrays, these are not processed either. (`[["a", "p", "p", "l", "e"]]`)
 
+Numeric arrays with imaginary component are converted into an array of objects with an `r` and `i` field for the real and imaginary components respectively.
+
 ## Limitaions
 There is no support for 64-bit data types and Structure, Object, Sparse array and 64-bit integer array types.
