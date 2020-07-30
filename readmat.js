@@ -245,6 +245,8 @@ function readMat(data) {
 				}
 				read.data = arr
 				return read;
+			default:
+				throw new BadFormatException(index, "Data element's type is " + type + " (unknown)");
 
 		}
 	}
@@ -299,6 +301,6 @@ function BadFormatException(byte, error) {
 	this.byte = byte; // Indexed from 0
 	this.error = error;
 	this.toString = function() {
-		"Unexpected value when reading at byte " + byte + ": " + error;
+		"Unexpected value when reading near byte " + byte + ": " + error;
 	};
 }
