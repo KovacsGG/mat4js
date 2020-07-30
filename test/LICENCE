@@ -1,5 +1,7 @@
-The following copyright notice and licence applies to the *.mat files in this folder.
-
+The following copyright notice and licence applies to the *.mat files in this folder with the exception of
+'complex_sparse.mat'
+'complex_sparse1.mat'
+---
 The MIT License (MIT)
 
 Copyright (c) 2011-2020 Nephics AB
