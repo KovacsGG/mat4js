@@ -3,11 +3,17 @@ function readMat(data) {
 		var type, length, taglength;
 		var view = new DataView(data);
 
-		if (view.getInt32(index, en) <= 18) { // Long data format
+
+		// Checking the first two bytes for 0 (as per the docs) should not work, because 1) length and type are not reversed as they shoud be for the small format, 2) length can be 0. This creates ambiguity as to the length of the tag. However, whith the 64 bit padding considered, small and long format data tags with 0 length data are identical.
+		var longFormatFlag = false;
+		if (view.getInt32(index, en) >>> 16 == 0) {
+			longFormatFlag = true;
+		}
+		if (longFormatFlag) {
 			type = view.getInt32(index, en);
 			length = view.getInt32(index + 4, en);
 			taglength = 8;
-		} else { // Small data format
+		} else {
 			// According to the specification these should be in the reverse order, but the files that I've seen do not follow the specification.
 			type = view.getInt16(index, en);
 			length = view.getInt16(index + 2, en);
