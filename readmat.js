@@ -121,10 +121,10 @@ function readMat(data) {
 				}
 				reader += nameArr.length;
 
-				var realArr = {};
+				var arrData;
 				switch (mxClass) {
 					case 1: // Cell array
-						realArr.data = [];
+						arrData = {data: []};
 						elemNum = 0;
 						for (var i = 0; i < dim.data.length; i++) {
 							if (!i) {
@@ -135,7 +135,7 @@ function readMat(data) {
 						}
 						for (var i = 0; i < elemNum; i++) {
 							var subArr = readDataElem(data, reader);
-							realArr.data.push(subArr.data);
+							arrData.data.push(subArr.data);
 							reader += subArr.length;
 						}
 						break;
@@ -144,6 +144,7 @@ function readMat(data) {
 					case 3: // Object
 						throw new BadFormatException(index, "Array's type is 3, 'mxOBJECT_CLASS' (unsupported)");
 					case 5: // Sparse array
+
 						throw new BadFormatException(index, "Array's type is 5, 'mxSPARSE_CLASS' (unsupported)");
 					case 4: // Character array
 					case 6: // Double precision array
@@ -154,8 +155,20 @@ function readMat(data) {
 					case 11: // 16-bit, unsigned integer
 					case 12: // 32-bit, signed integer
 					case 13: // 32-bit, unsigned integer
-						realArr = readDataElem(data, reader);
-						reader += realArr.length;
+						if (realFlag) {
+							var realArr = readDataElem(data, reader);
+							reader += realArr.length;
+							var imgArr = readDataElem(data, reader);
+							reader += imgArr.length;
+
+							arrData = [];
+							for (var i = 0; i < imgArr.data.length; i++) {
+								arrData.push({ r: realArr.data[i], i: imgArr.data[i] });
+							}
+						} else {
+							arrData = readDataElem(data, reader);
+							reader += arrData.length;
+						}
 						break;
 					case 14: // 64-bit, signed integer
 						throw new BadFormatException(index, "Array's type is 14, 'mxINT64_CLASS' (unsupported)");
@@ -190,18 +203,7 @@ function readMat(data) {
 					return rec(size, d);
 				}
 
-				if (realFlag) {
-					var imgArr = readDataElem(data, reader);
-					reader += imgArr.length;
-
-					var numArr = [];
-					for (var i = 0; i < imgArr.data.length; i++) {
-						numArr.push({ r: realArr.data[i], i: imgArr.data[i] });
-					}
-					var arrData = iterateN(dim.data, numArr);
-				} else {
-					var arrData = iterateN(dim.data, realArr.data);
-				}
+				arrData = iterateN(dim.data, arrData.data);
 
 				read.name = name;
 				read.data = arrData;
