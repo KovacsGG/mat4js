@@ -156,10 +156,11 @@ function readMat(data) {
 							reader += pi.length;
 							numArr = [];
 							for (var i = 0; i < ir.data.length; i++) {
-								numArr.push({ r: pr.data[i], i: ir.data[i] });
+								numArr.push({ r: pr.data[i], i: pi.data[i] });
 							}
+						} else {
+							numArr = pr.data;
 						}
-						numArr = pr.data;
 
 						// Initialize array of 0-s
 						arrData = {data: []};
@@ -178,6 +179,7 @@ function readMat(data) {
 								arrData.data[ir.data[j]][i] = numArr[j];
 							}
 						}
+						break;
 					case 4: // Character array
 					case 6: // Double precision array
 					case 7: // Single precision array
