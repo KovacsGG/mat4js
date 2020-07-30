@@ -145,7 +145,21 @@ function readMat(data) {
 					case 3: // Object
 						throw new BadFormatException(index, "Array's type is 3, 'mxOBJECT_CLASS' (unsupported)");
 					case 5: // Sparse array
+						var ir = readDataElem(data, reader);
+						reader += ir.length;
+						var jc = readDataElem(data, reader);
+						reader += jc.length;
+						var pr = readDataElem(data, reader);
+						reader += pr.length;
+						if (realFlag) {
+							var pi = readDataElem(data, reader);
+							reader += pi.length;
 
+							var numArr = [];
+							for (var i = 0; i < ir.data.length; i++) {
+								numArr.push({ r: pr.data[i], i: ir.data[i] });
+							}
+						}
 						throw new BadFormatException(index, "Array's type is 5, 'mxSPARSE_CLASS' (unsupported)");
 					case 4: // Character array
 					case 6: // Double precision array
