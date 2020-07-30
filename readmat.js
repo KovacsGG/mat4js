@@ -156,13 +156,13 @@ function readMat(data) {
 					for (var i = 0; i < imgArr.data.length; i++) {
 						numArr.push({ r: realArr.data[i], i: imgArr.data[i] });
 					}
-					var num = iterateN(dim.data, numArr);
+					var arrData = iterateN(dim.data, numArr);
 				} else {
-					var num = iterateN(dim.data, realArr.data);
+					var arrData = iterateN(dim.data, realArr.data);
 				}
 
 				read.name = name;
-				read.data = num;
+				read.data = arrData;
 				return read;
 
 			case 15: // compressed
