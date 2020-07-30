@@ -150,16 +150,34 @@ function readMat(data) {
 						reader += jc.length;
 						var pr = readDataElem(data, reader);
 						reader += pr.length;
+						var numArr;
 						if (realFlag) {
 							var pi = readDataElem(data, reader);
 							reader += pi.length;
-
-							var numArr = [];
+							numArr = [];
 							for (var i = 0; i < ir.data.length; i++) {
 								numArr.push({ r: pr.data[i], i: ir.data[i] });
 							}
 						}
-						throw new BadFormatException(index, "Array's type is 5, 'mxSPARSE_CLASS' (unsupported)");
+						numArr = pr.data;
+
+						// Initialize array of 0-s
+						arrData = {data: []};
+						// Sparse arrays can only be two dimensional
+						if (dim.data.length != 2) throw new IllegalDataException("MATLAB only supports two dimensional sparse arrays, while this sparse array is " + dim.data.length + " dimensional");
+						for (var i = 0; i < dim.data[0]; i++) {
+							arrData.data.push([]);
+							for (var j = 0; j < dim.data[1]; j++) {
+								arrData.data[i].push(0);
+							}
+						}
+
+
+						for (var i = 0; i < jc.data.length - 1; i++) {
+							for (var j = jc.data[i]; j < jc.data[i + 1]; j++) {
+								arrData.data[ir.data[j]][i] = numArr[j];
+							}
+						}
 					case 4: // Character array
 					case 6: // Double precision array
 					case 7: // Single precision array
@@ -216,7 +234,10 @@ function readMat(data) {
 					return rec(size, d);
 				}
 
-				arrData = iterateN(dim.data, arrData.data);
+				// Sparse arrays are easy to construct nested, because they are always 2D
+				if (mxClass != 5) {
+					arrData = iterateN(dim.data, arrData.data);
+				}
 
 				read.name = name;
 				read.data = arrData;
@@ -318,4 +339,11 @@ function BadFormatException(byte, error) {
 	this.toString = function() {
 		return "Unexpected value when reading near byte " + byte + ": " + error;
 	};
+}
+
+function IllegalDataException(error) {
+	this.error = error;
+	this.toString = function() {
+		return "The MAT file describes data that is not allowed by the documentation: " + error;
+	}
 }
