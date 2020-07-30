@@ -107,21 +107,64 @@ function readMat(data) {
 					var realFlag = (view.getInt8(reader + 10) >> 3) & 1;
 					var mxClass = view.getInt8(reader + 11);
 				}
-
 				reader += 16;
+
 				// Array dimensions
 				var dim = readDataElem(data, reader);
-
-
 				reader += dim.length;
+
 				// Array name
 				var name = "";
 				var nameArr = readDataElem(data, reader);
 				for (var i = 0; i < nameArr.data.length; i++) {
 					name += String.fromCharCode(nameArr.data[i]);
 				}
-
 				reader += nameArr.length;
+
+				var realArr = {};
+				switch (mxClass) {
+					case 1: // Cell array
+						realArr.data = [];
+						elemNum = 0;
+						for (var i = 0; i < dim.data.length; i++) {
+							if (!i) {
+								elemNum = dim.data[i];
+							} else {
+								elemNum *= dim.data[i];
+							}
+						}
+						for (var i = 0; i < elemNum; i++) {
+							var subArr = readDataElem(data, reader);
+							realArr.data.push(subArr.data);
+							reader += subArr.length;
+						}
+						break;
+					case 2: // Structure
+						throw new BadFormatException(index, "Array's type is 2, 'mxSTRUCT_CLASS' (unsupported)");
+					case 3: // Object
+						throw new BadFormatException(index, "Array's type is 3, 'mxOBJECT_CLASS' (unsupported)");
+					case 5: // Sparse array
+						throw new BadFormatException(index, "Array's type is 5, 'mxSPARSE_CLASS' (unsupported)");
+					case 4: // Character array
+					case 6: // Double precision array
+					case 7: // Single precision array
+					case 8: // 8-bit, signed integer
+					case 9: // 8-bit, unsigned integer
+					case 10: // 16-bit, signed integer
+					case 11: // 16-bit, unsigned integer
+					case 12: // 32-bit, signed integer
+					case 13: // 32-bit, unsigned integer
+						realArr = readDataElem(data, reader);
+						reader += realArr.length;
+						break;
+					case 14: // 64-bit, signed integer
+						throw new BadFormatException(index, "Array's type is 14, 'mxINT64_CLASS' (unsupported)");
+					case 15: // 64-bit, unsigned integer
+						throw new BadFormatException(index, "Array's type is 15, 'mxUINT64_CLASS' (unsupported)");
+					default:
+						throw new BadFormatException(index, "Array's type is " + mxClass + " (unknown)");
+				}
+
 				// Array data
 				function iterateN(size, flat) {
 					var d = 0;
@@ -146,8 +189,7 @@ function readMat(data) {
 					}
 					return rec(size, d);
 				}
-				var realArr = readDataElem(data, reader);
-				reader += realArr.length;
+
 				if (realFlag) {
 					var imgArr = readDataElem(data, reader);
 					reader += imgArr.length;
