@@ -316,6 +316,6 @@ function BadFormatException(byte, error) {
 	this.byte = byte; // Indexed from 0
 	this.error = error;
 	this.toString = function() {
-		"Unexpected value when reading near byte " + byte + ": " + error;
+		return "Unexpected value when reading near byte " + byte + ": " + error;
 	};
 }
