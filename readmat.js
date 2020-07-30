@@ -3,7 +3,6 @@ function readMat(data) {
 		var type, length, taglength;
 		var view = new DataView(data);
 
-
 		// Checking the first two bytes for 0 (as per the docs) should not work, because 1) length and type are not reversed as they shoud be for the small format, 2) length can be 0. This creates ambiguity as to the length of the tag. However, whith the 64 bit padding considered, small and long format data tags with 0 length data are identical.
 		var longFormatFlag = false;
 		if (view.getInt32(index, en) >>> 16 == 0) {

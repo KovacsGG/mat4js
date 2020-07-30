@@ -5,6 +5,7 @@ function read(input) {
 		fr.onload = function (e) {
 			var bin = e.target.result;
 			var json = readMat(bin);
+			console.log(JSON.stringify(json));
 			console.log(json);
 		}
 		fr.readAsArrayBuffer(file);
