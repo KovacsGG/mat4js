@@ -189,11 +189,11 @@ function readMat(data) {
 
 	var view = new DataView(data);
 
-	var en = True; // Little endian true
+	var en = true; // Little endian true
 	var endianIndicator = view.getInt16(126, en);
 	if (endianIndicator == 0x494D) {
-		en = False;
-	} else if (endianByte != 0x4D49) {
+		en = false;
+	} else if (endianIndicator != 0x4D49) {
 		throw new BadFormatException(126, "Expected 0x4D49 for big endian or 0x494D for little endian, but got " + endianIndicator);
 	}
 
