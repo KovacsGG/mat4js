@@ -190,7 +190,6 @@ function readMat(data) {
 					return rec(size, d);
 				}
 
-
 				if (realFlag) {
 					var imgArr = readDataElem(data, reader);
 					reader += imgArr.length;

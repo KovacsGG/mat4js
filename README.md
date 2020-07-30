@@ -14,17 +14,17 @@ Use `readMat(ArrayBuffer)`.
 
 It returns a JavaScript object with a `header` field and a `data` field.
 
-###`header`
+#### `header`
 contains 116 bytes of text.
 
 Padding characters are not truncated.
 
-###`data`
+#### `data`
 is an object containing the named arrays in the file. (`{name: content}`)
 
 Named arrays within arrays lose their names.
 
-Matlab likes to use flat but 2D arrays (e.g. 1x3). These are not unboxed and stay as [[1, 2, 3]]. To support actually multi-dimensional character arrays, these are not processed either. ([["a", "p", "p", "l", "e"]])
+Matlab likes to use flat but 2D arrays (e.g. 1x3). These are not unboxed and stay as `[[1, 2, 3]]`. To support actually multi-dimensional character arrays, these are not processed either. (`[["a", "p", "p", "l", "e"]]`)
 
 ## Limitaions
 There is no support for 64-bit data types and Structure, Object, Sparse array and 64-bit integer array types.
