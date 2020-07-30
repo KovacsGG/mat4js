@@ -12,7 +12,7 @@ One way is to download `readmat.js` to your webserver and include it in your HTM
 ## Read
 Use `readMat(ArrayBuffer)`.
 
-It returns a JavaScript object with a `header` field and a `data` field.
+It returns a JavaScript object with a `header` and `data` property.
 
 #### `header`
 contains 116 bytes of text.
@@ -28,5 +28,11 @@ Matlab likes to use flat but 2D arrays (e.g. 1x3). These are not unboxed and sta
 
 Numeric arrays with imaginary component are converted into an array of objects with an `r` and `i` field for the real and imaginary components respectively.
 
+Sparse arrays are converted to objects with `x` and `y` describing the width and height of the array respectively, and an `nz` property containing an array of objects representing non-zero values. These objects also have `x` and `y` properties for their indeces in the matrix and an additional `v` for the value.
+
 ## Limitaions
-There is no support for 64-bit data types and Structure, Object, Sparse array and 64-bit integer array types.
+There is no support for 64-bit data types and Structure, Object and 64-bit integer array types.
+
+Matlab v7.3 MAT-files use HDF5 data structure and are not supported. Such files will raise an `UnsupportedFeatureException` with the `.feature` propery set to `"HDF5"`. There are other JavaScript projects to view HDF5 files: https://github.com/usnistgov/jsfive
+
+There is no write functionality.

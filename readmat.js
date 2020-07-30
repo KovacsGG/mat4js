@@ -93,9 +93,9 @@ function readMat(data) {
 				throw new BadFormatException(index, "Data element's type is 11, 'Reserved' (unknown)");
 
 			case 12: // int64
-				throw new BadFormatException(index, "Data element's type is 12, 'INT64' (unsupported)");
+				throw new UnsupportedFeatureException(index, "INT64", "Data element's type is 12, 'INT64' (unsupported)");
 			case 13: // uint64
-				throw new BadFormatException(index, "Data element's type is 13, 'UINT64' (unsupported)");
+				throw new UnsupportedFeatureException(index, "UINT64", "Data element's type is 13, 'UINT64' (unsupported)");
 
 			case 14: // matrix
 				var reader = index + taglength;
@@ -141,9 +141,9 @@ function readMat(data) {
 						}
 						break;
 					case 2: // Structure
-						throw new BadFormatException(index, "Array's type is 2, 'mxSTRUCT_CLASS' (unsupported)");
+						throw new UnsupportedFeatureException(index, "STRUCT", "Array's type is 2, 'mxSTRUCT_CLASS' (unsupported)");
 					case 3: // Object
-						throw new BadFormatException(index, "Array's type is 3, 'mxOBJECT_CLASS' (unsupported)");
+						throw new UnsupportedFeatureException(index, "OBJECT", "Array's type is 3, 'mxOBJECT_CLASS' (unsupported)");
 					case 5: // Sparse array
 						var ir = readDataElem(data, reader);
 						reader += ir.length;
@@ -151,16 +151,28 @@ function readMat(data) {
 						reader += jc.length;
 						var pr = readDataElem(data, reader);
 						reader += pr.length;
+						var numArr;
 						if (realFlag) {
 							var pi = readDataElem(data, reader);
 							reader += pi.length;
-
-							var numArr = [];
+							numArr = [];
 							for (var i = 0; i < ir.data.length; i++) {
-								numArr.push({ r: pr.data[i], i: ir.data[i] });
+								numArr.push({ r: pr.data[i], i: pi.data[i] });
+							}
+						} else {
+							numArr = pr.data;
+						}
+
+						// Sparse arrays can only be two dimensional
+						if (dim.data.length != 2) throw new BadFormatException(index, "MATLAB only supports two dimensional sparse arrays, while this sparse array is " + dim.data.length + " dimensional");
+						arrData = {x: dim.data[1], y: dim.data[0], nz: []};
+
+						for (var i = 0; i < jc.data.length - 1; i++) {
+							for (var j = jc.data[i]; j < jc.data[i + 1]; j++) {
+								arrData.nz.push({x: i, y: ir.data[j], v: numArr[j]});
 							}
 						}
-						throw new BadFormatException(index, "Array's type is 5, 'mxSPARSE_CLASS' (unsupported)");
+						break;
 					case 4: // Character array
 					case 6: // Double precision array
 					case 7: // Single precision array
@@ -186,9 +198,9 @@ function readMat(data) {
 						}
 						break;
 					case 14: // 64-bit, signed integer
-						throw new BadFormatException(index, "Array's type is 14, 'mxINT64_CLASS' (unsupported)");
+						throw new UnsupportedFeatureException(index, "INT64", "Array's type is 14, 'mxINT64_CLASS' (unsupported)");
 					case 15: // 64-bit, unsigned integer
-						throw new BadFormatException(index, "Array's type is 15, 'mxUINT64_CLASS' (unsupported)");
+						throw new UnsupportedFeatureException(index, "UINT64", "Array's type is 15, 'mxUINT64_CLASS' (unsupported)");
 					default:
 						throw new BadFormatException(index, "Array's type is " + mxClass + " (unknown)");
 				}
@@ -217,7 +229,10 @@ function readMat(data) {
 					return rec(size, d);
 				}
 
-				arrData = iterateN(dim.data, arrData.data);
+				// Sparse arrays are easy to construct nested, because they are always 2D
+				if (mxClass != 5) {
+					arrData = iterateN(dim.data, arrData.data);
+				}
 
 				read.name = name;
 				read.data = arrData;
@@ -278,7 +293,14 @@ function readMat(data) {
 	}
 
 	var version = view.getInt16(124, en)
-	if (version != 256) throw new BadFormatException(124, "Expected 0x0100 indicating level 5 MAT-file, but got " + version);
+	switch (version) {
+		case 0x0100:
+			break;
+		case 0x0200:
+			throw new UnsupportedFeatureException(124, "HDF5", "Matlab v7.3 MAT-files are not supported");
+		default:
+			throw new BadFormatException(124, "Version identifier " + version + " unknown");
+	}
 
 	// First 116 bytes is human-readable text field
 	var header = "";
@@ -318,5 +340,14 @@ function BadFormatException(byte, error) {
 	this.error = error;
 	this.toString = function() {
 		return "Unexpected value when reading near byte " + byte + ": " + error;
+	};
+}
+
+function UnsupportedFeatureException(byte, feature, error) {
+	this.byte = byte
+	this.error = error;
+	this.feature = feature;
+	this.toString = function() {
+		return "The MAT file has features that are not supported. See Limitations on the project's page: " + error;
 	};
 }
