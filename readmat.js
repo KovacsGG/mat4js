@@ -3,11 +3,16 @@ function readMat(data) {
 		var type, length, taglength;
 		var view = new DataView(data);
 
-		if (view.getInt32(index, en) <= 18) { // Long data format
+		// Checking the first two bytes for 0 (as per the docs) should not work, because 1) length and type are not reversed as they shoud be for the small format, 2) length can be 0. This creates ambiguity as to the length of the tag. However, whith the 64 bit padding considered, small and long format data tags with 0 length data are identical.
+		var longFormatFlag = false;
+		if (view.getInt32(index, en) >>> 16 == 0) {
+			longFormatFlag = true;
+		}
+		if (longFormatFlag) {
 			type = view.getInt32(index, en);
 			length = view.getInt32(index + 4, en);
 			taglength = 8;
-		} else { // Small data format
+		} else {
 			// According to the specification these should be in the reverse order, but the files that I've seen do not follow the specification.
 			type = view.getInt16(index, en);
 			length = view.getInt16(index + 2, en);
@@ -93,7 +98,7 @@ function readMat(data) {
 
 			case 14: // matrix
 				var reader = index + taglength;
-				// Array flags subelement is written as an int32, which makes manual byte swapping necessary
+				// Array flags subelement is written as an int32, which makes manual byte shifting necessary
 				if (en) { // little endian: taglength (8) + 8 byte + 4th bit of the 2nd byte is the real flag
 					var realFlag = (view.getInt8(reader + 9) >> 3) & 1;
 					var mxClass = view.getInt8(reader + 8);
@@ -101,21 +106,64 @@ function readMat(data) {
 					var realFlag = (view.getInt8(reader + 10) >> 3) & 1;
 					var mxClass = view.getInt8(reader + 11);
 				}
-
 				reader += 16;
+
 				// Array dimensions
 				var dim = readDataElem(data, reader);
-
-
 				reader += dim.length;
+
 				// Array name
 				var name = "";
 				var nameArr = readDataElem(data, reader);
 				for (var i = 0; i < nameArr.data.length; i++) {
 					name += String.fromCharCode(nameArr.data[i]);
 				}
-
 				reader += nameArr.length;
+
+				var realArr = {};
+				switch (mxClass) {
+					case 1: // Cell array
+						realArr.data = [];
+						elemNum = 0;
+						for (var i = 0; i < dim.data.length; i++) {
+							if (!i) {
+								elemNum = dim.data[i];
+							} else {
+								elemNum *= dim.data[i];
+							}
+						}
+						for (var i = 0; i < elemNum; i++) {
+							var subArr = readDataElem(data, reader);
+							realArr.data.push(subArr.data);
+							reader += subArr.length;
+						}
+						break;
+					case 2: // Structure
+						throw new BadFormatException(index, "Array's type is 2, 'mxSTRUCT_CLASS' (unsupported)");
+					case 3: // Object
+						throw new BadFormatException(index, "Array's type is 3, 'mxOBJECT_CLASS' (unsupported)");
+					case 5: // Sparse array
+						throw new BadFormatException(index, "Array's type is 5, 'mxSPARSE_CLASS' (unsupported)");
+					case 4: // Character array
+					case 6: // Double precision array
+					case 7: // Single precision array
+					case 8: // 8-bit, signed integer
+					case 9: // 8-bit, unsigned integer
+					case 10: // 16-bit, signed integer
+					case 11: // 16-bit, unsigned integer
+					case 12: // 32-bit, signed integer
+					case 13: // 32-bit, unsigned integer
+						realArr = readDataElem(data, reader);
+						reader += realArr.length;
+						break;
+					case 14: // 64-bit, signed integer
+						throw new BadFormatException(index, "Array's type is 14, 'mxINT64_CLASS' (unsupported)");
+					case 15: // 64-bit, unsigned integer
+						throw new BadFormatException(index, "Array's type is 15, 'mxUINT64_CLASS' (unsupported)");
+					default:
+						throw new BadFormatException(index, "Array's type is " + mxClass + " (unknown)");
+				}
+
 				// Array data
 				function iterateN(size, flat) {
 					var d = 0;
@@ -140,8 +188,7 @@ function readMat(data) {
 					}
 					return rec(size, d);
 				}
-				var realArr = readDataElem(data, reader);
-				reader += realArr.length;
+
 				if (realFlag) {
 					var imgArr = readDataElem(data, reader);
 					reader += imgArr.length;
@@ -150,13 +197,13 @@ function readMat(data) {
 					for (var i = 0; i < imgArr.data.length; i++) {
 						numArr.push({ r: realArr.data[i], i: imgArr.data[i] });
 					}
-					var num = iterateN(dim.data, numArr);
+					var arrData = iterateN(dim.data, numArr);
 				} else {
-					var num = iterateN(dim.data, realArr.data);
+					var arrData = iterateN(dim.data, realArr.data);
 				}
 
 				read.name = name;
-				read.data = num;
+				read.data = arrData;
 				return read;
 
 			case 15: // compressed
@@ -176,24 +223,38 @@ function readMat(data) {
 				return read;
 
 			case 16: // utf8
-				throw new BadFormatException(index, "Data element's type is 16, 'UTF8' (unsupported)");
+				var arr = "";
+				for (var i = 0; i < length; i++) {
+					arr += String.fromCodePoint(view.getInt8(index + taglength + i));
+				}
+				read.data = arr
+				return read;
 
 			case 17: // utf16
-				throw new BadFormatException(index, "Data element's type is 17, 'UTF16' (unsupported)");
-
+				var arr = "";
+				for (var i = 0; i < length; i++) {
+					arr += String.fromCodePoint(view.getInt16(index + taglength + i, en));
+				}
+				read.data = arr
+				return read;
 			case 18: // utf32
-			  // TODO: String.fromCodePoint()
-				throw new BadFormatException(index, "Data element's type is 18, 'UTF32' (unsupported)");
+				var arr = "";
+				for (var i = 0; i < length; i++) {
+					arr += String.fromCodePoint(view.getInt32(index + taglength + i, en));
+				}
+				read.data = arr
+				return read;
+
 		}
 	}
 
 	var view = new DataView(data);
 
-	var en = True; // Little endian true
+	var en = true; // Little endian true
 	var endianIndicator = view.getInt16(126, en);
 	if (endianIndicator == 0x494D) {
-		en = False;
-	} else if (endianByte != 0x4D49) {
+		en = false;
+	} else if (endianIndicator != 0x4D49) {
 		throw new BadFormatException(126, "Expected 0x4D49 for big endian or 0x494D for little endian, but got " + endianIndicator);
 	}
 
