@@ -99,7 +99,7 @@ function readMat(data) {
 
 			case 14: // matrix
 				var reader = index + taglength;
-				// Array flags subelement is written as an int32, which makes manual byte swapping necessary
+				// Array flags subelement is written as an int32, which makes manual byte shifting necessary
 				if (en) { // little endian: taglength (8) + 8 byte + 4th bit of the 2nd byte is the real flag
 					var realFlag = (view.getInt8(reader + 9) >> 3) & 1;
 					var mxClass = view.getInt8(reader + 8);
