@@ -129,7 +129,32 @@ function readMat(data) {
 				reader += nameArr.length;
 
 				// Arr data
+				// This recursive function takes the column-major data ('flat') and the array's dimensions and constructs the multidimensional array
+				function iterateN(size, flat) {
+					var d = 0;
+					var n = 0;
+					var index = [];
+					for (var i = 0; i < size.length; i++) index.push(0);
+					function rec(size, d) {
+						var res = [];
+						for (var i = 0; size[d] > i; i++) {
+							if (d == size.length - 1) {
+								res.push(flat[calcIndex(index, size)]);
+								index[n]++;
+							} else {
+								n++;
+								res.push(rec(size, d + 1));
+								index[n] = 0;
+								n--;
+								index[n]++;
+							}
+						}
+						return res;
+					}
+					return rec(size, d);
+				}
 				var arrData;
+				
 				switch (mxClass) {
 					case 1: // Cell array
 						arrData = {data: []};
@@ -146,11 +171,22 @@ function readMat(data) {
 							arrData.data.push(subArr.data);
 							reader += subArr.length;
 						}
+						arrData = iterateN(dim.data, arrData.data);
 						break;
 					case 2: // Structure
 						throw new UnsupportedFeatureException(data, index, "STRUCT", "Array's type is 2, 'mxSTRUCT_CLASS' (unsupported)");
 					case 3: // Object
 						throw new UnsupportedFeatureException(data, index, "OBJECT", "Array's type is 3, 'mxOBJECT_CLASS' (unsupported)");
+					case 4: // Character array
+						arrData = readDataElem(data, reader);
+						reader += arrData.length;
+						// It might be a multidimensional array instead of a char vector. If it isn't though, the string shouldn't be broken up
+						if (dim.data.length > 1) {
+							arrData = iterateN(dim.data, arrData.data);
+						} else {
+							arrData = arrData.data;
+						}
+						break;
 					case 5: // Sparse array
 						var ir = readDataElem(data, reader);
 						reader += ir.length;
@@ -180,7 +216,6 @@ function readMat(data) {
 							}
 						}
 						break;
-					case 4: // Character array
 					case 6: // Double precision array
 					case 7: // Single precision array
 					case 8: // 8-bit, signed integer
@@ -203,6 +238,7 @@ function readMat(data) {
 							arrData = readDataElem(data, reader);
 							reader += arrData.length;
 						}
+						arrData = iterateN(dim.data, arrData.data);
 						break;
 					case 14: // 64-bit, signed integer
 						throw new UnsupportedFeatureException(data, index, "INT64", "Array's type is 14, 'mxINT64_CLASS' (unsupported)");
@@ -212,34 +248,7 @@ function readMat(data) {
 						throw new BadFormatException(data, index, "Array's type is " + mxClass + " (unknown)");
 				}
 
-				function iterateN(size, flat) {
-					var d = 0;
-					var n = 0;
-					var index = [];
-					for (var i = 0; i < size.length; i++) index.push(0);
-					function rec(size, d) {
-						var res = [];
-						for (var i = 0; size[d] > i; i++) {
-							if (d == size.length - 1) {
-								res.push(flat[calcIndex(index, size)]);
-								index[n]++;
-							} else {
-								n++;
-								res.push(rec(size, d + 1));
-								index[n] = 0;
-								n--;
-								index[n]++;
-							}
-						}
-						return res;
-					}
-					return rec(size, d);
-				}
 
-				// Sparse arrays are easy to construct nested, because they are always 2D
-				if (mxClass != 5) {
-					arrData = iterateN(dim.data, arrData.data);
-				}
 
 				read.name = name;
 				read.data = arrData;
