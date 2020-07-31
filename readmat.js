@@ -75,7 +75,7 @@ function readMat(data) {
 				return read;
 
 			case 8: // reserved
-				throw new BadFormatException(index, "Data element's type is 8, 'Reserved' (unknown)");
+				throw new BadFormatException(data, index, "Data element's type is 8, 'Reserved' (unknown)");
 
 			case 9: // double
 				var arr = [];
@@ -86,15 +86,15 @@ function readMat(data) {
 				return read;
 
 			case 10: // reserved
-				throw new BadFormatException(index, "Data element's type is 10, 'Reserved' (unknown)");
+				throw new BadFormatException(data, index, "Data element's type is 10, 'Reserved' (unknown)");
 
 			case 11: // reserved
-				throw new BadFormatException(index, "Data element's type is 11, 'Reserved' (unknown)");
+				throw new BadFormatException(data, index, "Data element's type is 11, 'Reserved' (unknown)");
 
 			case 12: // int64
-				throw new UnsupportedFeatureException(index, "INT64", "Data element's type is 12, 'INT64' (unsupported)");
+				throw new UnsupportedFeatureException(data, index, "INT64", "Data element's type is 12, 'INT64' (unsupported)");
 			case 13: // uint64
-				throw new UnsupportedFeatureException(index, "UINT64", "Data element's type is 13, 'UINT64' (unsupported)");
+				throw new UnsupportedFeatureException(data, index, "UINT64", "Data element's type is 13, 'UINT64' (unsupported)");
 
 			case 14: // matrix
 				var reader = index + taglength;
@@ -140,9 +140,9 @@ function readMat(data) {
 						}
 						break;
 					case 2: // Structure
-						throw new UnsupportedFeatureException(index, "STRUCT", "Array's type is 2, 'mxSTRUCT_CLASS' (unsupported)");
+						throw new UnsupportedFeatureException(data, index, "STRUCT", "Array's type is 2, 'mxSTRUCT_CLASS' (unsupported)");
 					case 3: // Object
-						throw new UnsupportedFeatureException(index, "OBJECT", "Array's type is 3, 'mxOBJECT_CLASS' (unsupported)");
+						throw new UnsupportedFeatureException(data, index, "OBJECT", "Array's type is 3, 'mxOBJECT_CLASS' (unsupported)");
 					case 5: // Sparse array
 						var ir = readDataElem(data, reader);
 						reader += ir.length;
@@ -163,7 +163,7 @@ function readMat(data) {
 						}
 
 						// Sparse arrays can only be two dimensional
-						if (dim.data.length != 2) throw new BadFormatException(index, "MATLAB only supports two dimensional sparse arrays, while this sparse array is " + dim.data.length + " dimensional");
+						if (dim.data.length != 2) throw new BadFormatException(data, index, "MATLAB only supports two dimensional sparse arrays, while this sparse array is " + dim.data.length + " dimensional");
 						arrData = {x: dim.data[1], y: dim.data[0], nz: []};
 
 						for (var i = 0; i < jc.data.length - 1; i++) {
@@ -197,11 +197,11 @@ function readMat(data) {
 						}
 						break;
 					case 14: // 64-bit, signed integer
-						throw new UnsupportedFeatureException(index, "INT64", "Array's type is 14, 'mxINT64_CLASS' (unsupported)");
+						throw new UnsupportedFeatureException(data, index, "INT64", "Array's type is 14, 'mxINT64_CLASS' (unsupported)");
 					case 15: // 64-bit, unsigned integer
-						throw new UnsupportedFeatureException(index, "UINT64", "Array's type is 15, 'mxUINT64_CLASS' (unsupported)");
+						throw new UnsupportedFeatureException(data, index, "UINT64", "Array's type is 15, 'mxUINT64_CLASS' (unsupported)");
 					default:
-						throw new BadFormatException(index, "Array's type is " + mxClass + " (unknown)");
+						throw new BadFormatException(data, index, "Array's type is " + mxClass + " (unknown)");
 				}
 
 				function iterateN(size, flat) {
@@ -276,7 +276,7 @@ function readMat(data) {
 				read.data = arr
 				return read;
 			default:
-				throw new BadFormatException(index, "Data element's type is " + type + " (unknown)");
+				throw new BadFormatException(data, index, "Data element's type is " + type + " (unknown)");
 
 		}
 	}
@@ -288,7 +288,7 @@ function readMat(data) {
 	if (endianIndicator == 0x494D) {
 		en = false;
 	} else if (endianIndicator != 0x4D49) {
-		throw new BadFormatException(126, "Expected 0x4D49 for big endian or 0x494D for little endian, but got " + endianIndicator);
+		throw new BadFormatException(data, 126, "Expected 0x4D49 for big endian or 0x494D for little endian, but got " + endianIndicator);
 	}
 
 	var version = view.getInt16(124, en)
@@ -296,9 +296,9 @@ function readMat(data) {
 		case 0x0100:
 			break;
 		case 0x0200:
-			throw new UnsupportedFeatureException(124, "HDF5", "Matlab v7.3 MAT-files are not supported");
+			throw new UnsupportedFeatureException(data, 124, "HDF5", "Matlab v7.3 MAT-files are not supported");
 		default:
-			throw new BadFormatException(124, "Version identifier " + version + " unknown");
+			throw new BadFormatException(data, 124, "Version identifier " + version + " unknown");
 	}
 
 	// First 116 bytes is human-readable text field
@@ -334,7 +334,8 @@ function calcIndex(index, size) {
 	return i;
 }
 
-function BadFormatException(byte, error) {
+function BadFormatException(data, byte, error) {
+	this.data = data;
 	this.byte = byte; // Indexed from 0
 	this.error = error;
 	this.toString = function() {
@@ -342,7 +343,8 @@ function BadFormatException(byte, error) {
 	};
 }
 
-function UnsupportedFeatureException(byte, feature, error) {
+function UnsupportedFeatureException(data, byte, feature, error) {
+	this.data = data;
 	this.byte = byte
 	this.error = error;
 	this.feature = feature;
