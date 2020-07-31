@@ -111,6 +111,14 @@ function readMat(data) {
 				// Array dimensions
 				var dim = readDataElem(data, reader);
 				reader += dim.length;
+				// Horizontal (1xn) and vertical (nx1) vectors should be treated as 1D (n)
+				if (dim.data.length == 2) {
+					if (dim.data[0] == 1) {
+						dim.data = [dim.data[1]];
+					} else if (dim.data[1] == 1) { // 1x1 -> 1
+						dim.data = [dim.data[0]];
+					}
+				}
 
 				// Array name
 				var name = "";
