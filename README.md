@@ -12,7 +12,7 @@ One way is to download `readmat.js` to your webserver and include it in your HTM
 ## Read
 Use `readMat(ArrayBuffer)`.
 
-It returns a JavaScript object with a `header` field and a `data` field.
+It returns a JavaScript object with a `header` and `data` property.
 
 #### `header`
 contains 116 bytes of text.
@@ -32,3 +32,7 @@ Sparse arrays are converted to regular arrays filled out with 0-s, so one should
 
 ## Limitaions
 There is no support for 64-bit data types and Structure, Object and 64-bit integer array types.
+
+Matlab v7.3 MAT-files use HDF5 data structure and are not supported. Such files will raise an `UnsupportedFeatureException` with the `.feature` propery set to `"HDF5"`. There are other JavaScript projects to view HDF5 files: https://github.com/usnistgov/jsfive
+
+There is no write functionality.
