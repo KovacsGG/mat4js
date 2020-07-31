@@ -162,21 +162,13 @@ function readMat(data) {
 							numArr = pr.data;
 						}
 
-						// Initialize array of 0-s
-						arrData = {data: []};
 						// Sparse arrays can only be two dimensional
 						if (dim.data.length != 2) throw new BadFormatException(index, "MATLAB only supports two dimensional sparse arrays, while this sparse array is " + dim.data.length + " dimensional");
-						for (var i = 0; i < dim.data[0]; i++) {
-							arrData.data.push([]);
-							for (var j = 0; j < dim.data[1]; j++) {
-								arrData.data[i].push(0);
-							}
-						}
-
+						arrData = {x: dim.data[1], y: dim.data[0], nz: []};
 
 						for (var i = 0; i < jc.data.length - 1; i++) {
 							for (var j = jc.data[i]; j < jc.data[i + 1]; j++) {
-								arrData.data[ir.data[j]][i] = numArr[j];
+								arrData.nz.push({x: i, y: ir.data[j], v: numArr[j]});
 							}
 						}
 						break;
