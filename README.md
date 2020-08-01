@@ -24,7 +24,7 @@ is an object containing the named arrays in the file. (`{name: content}`)
 
 Named arrays within arrays lose their names.
 
-Matlab likes to use flat but 2D arrays (e.g. 1x3). These are not unboxed and stay as `[[1, 2, 3]]`. To support actually multi-dimensional character arrays, these are not processed either. (`[["a", "p", "p", "l", "e"]]`)
+Matlab stores vectors as 2D but flat arrays (1xn or nx1). These are converted to plain 1D arrays (`[1, 2, 3]` instead of `[[1, 2, 3]]`) or strings in case of character arrays. In multidimensional character arrays the characters are not concatenated to form strings, but are kept separate. (`{char_array: [["a", "b", "c"], ["d", "e", "f"]]}` instead of `{char_vector: "abc"}`)
 
 Numeric arrays with imaginary component are converted into an array of objects with `r` and `i` attributes for the real and imaginary components respectively.
 
