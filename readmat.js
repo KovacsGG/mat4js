@@ -245,6 +245,10 @@ function readMat(data) {
 						throw new UnsupportedFeatureException(data, index, "INT64", "Array's type is 14, 'mxINT64_CLASS' (unsupported)");
 					case 15: // 64-bit, unsigned integer
 						throw new UnsupportedFeatureException(data, index, "UINT64", "Array's type is 15, 'mxUINT64_CLASS' (unsupported)");
+					case 16: // undocumented mxFUNCTION_CLASS
+					case 17: // undocumented mxOPAQUE_CLASS
+						// Ignore
+						return read;
 					default:
 						throw new BadFormatException(data, index, "Array's type is " + mxClass + " (unknown)");
 				}
