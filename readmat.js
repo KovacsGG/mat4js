@@ -154,7 +154,7 @@ function readMat(data) {
 					return rec(size, d);
 				}
 				var arrData;
-				
+
 				switch (mxClass) {
 					case 1: // Cell array
 						arrData = {data: []};
@@ -266,7 +266,6 @@ function readMat(data) {
 				var plain = readDataElem(inflate.decompress().buffer, 0);
 				if (plain.hasOwnProperty('data')) read.data = plain.data;
 				if (plain.hasOwnProperty('name')) read.name = plain.name;
-				if (plain.hasOwnProperty('e')) read.e = plain.e;
 				read.length = length + taglength; // Compressed data doesn't use 64-bit padding
 				return read;
 
@@ -332,7 +331,6 @@ function readMat(data) {
 	while (index < data.byteLength) {
 		var elem = readDataElem(data, index);
 		if (elem.hasOwnProperty('name')) output.data[elem.name] = elem.data;
-		if (elem.hasOwnProperty('e')) output.e = elem.e;
 
 		index += elem.length;
 	}
