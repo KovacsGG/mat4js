@@ -26,7 +26,7 @@ Named arrays within arrays lose their names.
 
 Matlab likes to use flat but 2D arrays (e.g. 1x3). These are not unboxed and stay as `[[1, 2, 3]]`. To support actually multi-dimensional character arrays, these are not processed either. (`[["a", "p", "p", "l", "e"]]`)
 
-Numeric arrays with imaginary component are converted into an array of objects with an `r` and `i` field for the real and imaginary components respectively.
+Numeric arrays with imaginary component are converted into an array of objects with `r` and `i` attributes for the real and imaginary components respectively.
 
 Sparse arrays are converted to objects with `x` and `y` describing the width and height of the array respectively, and an `nz` property containing an array of objects representing non-zero values. These objects also have `x` and `y` properties for their indeces in the matrix and an additional `v` for the value.
 
