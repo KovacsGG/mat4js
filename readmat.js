@@ -159,7 +159,7 @@ function readMat(data) {
 				switch (mxClass) {
 					case 1: // Cell array
 						arrData = {data: []};
-						elemNum = 0;
+						var elemNum = 0;
 						for (var i = 0; i < dim.data.length; i++) {
 							if (!i) {
 								elemNum = dim.data[i];
@@ -174,8 +174,26 @@ function readMat(data) {
 						}
 						arrData = iterateN(dim.data, arrData.data);
 						break;
+
 					case 2: // Structure
-						throw new UnsupportedFeatureException(data, index, "STRUCT", "Array's type is 2, 'mxSTRUCT_CLASS' (unsupported)");
+						arrData = {};
+						var nameLength = readDataElem(data, reader);
+						reader += nameLength.length;
+						var fieldNameFlat = readDataElem(data, reader);
+						reader += fieldNameFlat.length;
+						var fieldNames = [];
+						for (var i = 0; i < fieldNameFlat.data.length / nameLength.data[0]; i++) {
+							fieldNames.push("");
+							for (var j = 0; fieldNameFlat.data[j + i * nameLength.data[0]] != 0 && j < nameLength.data[0]; j++) {
+								fieldNames[i] += String.fromCharCode(fieldNameFlat.data[j + i * nameLength.data[0]]);
+							}
+						}
+						for (var i = 0; i < fieldNames.length; i++) {
+							var field = readDataElem(data, reader);
+							arrData[fieldNames[i]] = field.data;
+							reader += field.length;
+						}
+						break;
 					case 3: // Object
 						throw new UnsupportedFeatureException(data, index, "OBJECT", "Array's type is 3, 'mxOBJECT_CLASS' (unsupported)");
 					case 4: // Character array
