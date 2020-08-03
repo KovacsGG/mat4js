@@ -169,10 +169,10 @@ function readMat(data) {
 						}
 						for (var i = 0; i < elemNum; i++) {
 							var subArr = readDataElem(data, reader);
-							arrData.data.push(subArr.data);
+							flat.push(subArr.data);
 							reader += subArr.length;
 						}
-						arrData = iterateN(dim.data, arrData.data);
+						arrData = iterateN(dim.data, flat);
 						break;
 
 					case 2: // Structure
@@ -221,13 +221,13 @@ function readMat(data) {
 					case 3: // Object
 						throw new UnsupportedFeatureException(data, index, "OBJECT", "Array's type is 3, 'mxOBJECT_CLASS' (unsupported)");
 					case 4: // Character array
-						arrData = readDataElem(data, reader);
-						reader += arrData.length;
+						flat = readDataElem(data, reader);
+						reader += flat.length;
 						// It might be a multidimensional array instead of a char vector. If it isn't though, the string shouldn't be broken up
 						if (dim.data.length > 1) {
-							arrData = iterateN(dim.data, arrData.data);
+							arrData = iterateN(dim.data, flat.data);
 						} else {
-							arrData = arrData.data;
+							arrData = flat.data;
 						}
 						break;
 					case 5: // Sparse array
@@ -267,21 +267,23 @@ function readMat(data) {
 					case 11: // 16-bit, unsigned integer
 					case 12: // 32-bit, signed integer
 					case 13: // 32-bit, unsigned integer
+						var flat = [];
 						if (realFlag) {
 							var pr = readDataElem(data, reader);
 							reader += pr.length;
 							var ir = readDataElem(data, reader);
 							reader += ir.length;
+							reader += pi.length;
 
-							arrData = [];
-							for (var i = 0; i < ir.data.length; i++) {
-								arrData.push({ r: pr.data[i], i: ir.data[i] });
+							for (var i = 0; i < pr.data.length; i++) {
+								flat.push({ r: pr.data[i], i: pi.data[i] });
 							}
 						} else {
-							arrData = readDataElem(data, reader);
-							reader += arrData.length;
+							pr = readDataElem(data, reader);
+							reader += pr.length;
+							flat = pr.data;
 						}
-						arrData = iterateN(dim.data, arrData.data);
+						arrData = iterateN(dim.data, flat);
 						break;
 					case 14: // 64-bit, signed integer
 						throw new UnsupportedFeatureException(data, index, "INT64", "Array's type is 14, 'mxINT64_CLASS' (unsupported)");
