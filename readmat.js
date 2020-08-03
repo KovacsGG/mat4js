@@ -271,8 +271,7 @@ function readMat(data) {
 						if (realFlag) {
 							var pr = readDataElem(data, reader);
 							reader += pr.length;
-							var ir = readDataElem(data, reader);
-							reader += ir.length;
+							var pi = readDataElem(data, reader);
 							reader += pi.length;
 
 							for (var i = 0; i < pr.data.length; i++) {
