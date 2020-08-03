@@ -158,7 +158,7 @@ function readMat(data) {
 
 				switch (mxClass) {
 					case 1: // Cell array
-						arrData = {data: []};
+						var flat = [];
 						var elemNum = 0;
 						for (var i = 0; i < dim.data.length; i++) {
 							if (!i) {
@@ -188,10 +188,34 @@ function readMat(data) {
 								fieldNames[i] += String.fromCharCode(fieldNameFlat.data[j + i * nameLength.data[0]]);
 							}
 						}
-						for (var i = 0; i < fieldNames.length; i++) {
-							var field = readDataElem(data, reader);
-							arrData[fieldNames[i]] = field.data;
-							reader += field.length;
+
+						// Structs can be defined as scalar (1x1) or not regardless of the presence of cell arrays in the data
+						if (dim.data[0] != 1 || dim.data.length > 1) {
+							var flat = [];
+							var elemNum = 0;
+							for (var i = 0; i < dim.data.length; i++) {
+								if (!i) {
+									elemNum = dim.data[i];
+								} else {
+									elemNum *= dim.data[i];
+								}
+							}
+							for (var i = 0; i < elemNum; i++) {
+								var cell = {};
+								for (var j = 0; j < fieldNames.length; j++) {
+									var field = readDataElem(data, reader);
+									reader += field.length;
+									cell[fieldNames[j]] = field.data;
+								}
+								flat.push(cell);
+							}
+							arrData = iterateN(dim.data, flat);
+						} else {
+							for (var i = 0; i < fieldNames.length; i++) {
+								var field = readDataElem(data, reader);
+								reader += field.length;
+								arrData[fieldNames[i]] = field.data;
+							}
 						}
 						break;
 					case 3: // Object

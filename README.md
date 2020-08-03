@@ -26,10 +26,31 @@ Matlab stores vectors as 2D but flat arrays (1xn or nx1). These are converted to
 
 Numeric arrays with imaginary component are converted into an array of objects with `.r` and `.i` properties for the real and imaginary components respectively.
 
+Scalar structs are converted into objects as would be expected, while non-scalar structs are more akin to cell arrays. For a struct constructed with
+```
+S = struct()
+S.cell = {1 2; 3 4}
+S.fruit = 'apple'
+```
+In JavaScript
+```
+S.cell[1][0] == 3
+S.fruit == "apple"
+```
+But for one constructed with `S = struct('cell', {1 2; 3 4}, 'fruit', 'apple')` (non-scalar):
+```
+S[1][0].cell == 3
+S[1][1].cell == 4
+S[1][0].fruit == "apple"
+S[1][1].fruit == "apple"
+```
+and `S.fruit == "apple"` is not accessible.
+
+
 Sparse arrays are converted to objects with `.x` and `.y` properties describing the width and height of the array respectively, and an `.nz` property containing an array of objects representing non-zero values. These objects also have `.x` and `.y` properties for their indeces in the matrix and an additional `.v` for the non-zero value at the index.
 
 ## Limitaions
-There is no support for 64-bit data types and Structure, Object and 64-bit integer array types.
+There is no support for 64-bit data or array types and Object array types.
 
 Matlab v7.3 MAT-files use HDF5 data structure and are not supported. Such files will raise an `UnsupportedFeatureException` with the `.feature` property set to `"HDF5"`. There are other JavaScript projects to view HDF5 files: https://github.com/usnistgov/jsfive
 
