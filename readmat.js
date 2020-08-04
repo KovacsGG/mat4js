@@ -304,14 +304,9 @@ function readMat(data) {
 
 			case 15: // compressed
 				var compressed = new Uint8Array(data.slice(index + taglength, index + taglength + length));
-				var inflate = new Zlib.Inflate(compressed, {
-					'index': 0, // start position in input buffer
-					'bufferSize': 56, // initial output buffer size
-					'bufferType': 1, // buffer expantion type
-					'resize': true, // resize buffer(ArrayBuffer) when end of decompression (default: false)
-					'verify': false  // verify decompression result (default: false)
-				});
-				var plain = readDataElem(inflate.decompress().buffer, 0);
+				var inflate = pako.inflate(compressed);
+				var plain = readDataElem(inflate.buffer, 0);
+				//var plain = readDataElem(inflate.decompress().buffer, 0);
 				if (plain.hasOwnProperty('data')) read.data = plain.data;
 				if (plain.hasOwnProperty('name')) read.name = plain.name;
 				read.length = length + taglength; // Compressed data doesn't use 64-bit padding
