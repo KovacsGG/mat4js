@@ -378,35 +378,35 @@ function readMat(data) {
 		index += elem.length;
 	}
 	return output;
-}
 
-function round8byte(byte) {
-	if (byte % 8 == 0) return byte;
-	return byte + (8 - byte % 8);
-}
-function calcIndex(index, size) {
-	var i = index[0];
-	for (var j = 1; j < size.length; j++) {
-		i += index[j] * size[j - 1];
+	function round8byte(byte) {
+		if (byte % 8 == 0) return byte;
+		return byte + (8 - byte % 8);
 	}
-	return i;
-}
+	function calcIndex(index, size) {
+		var i = index[0];
+		for (var j = 1; j < size.length; j++) {
+			i += index[j] * size[j - 1];
+		}
+		return i;
+	}
 
-function BadFormatException(data, byte, error) {
-	this.data = data;
-	this.byte = byte; // Indexed from 0
-	this.error = error;
-	this.toString = function() {
-		return "Unexpected value when reading near byte " + byte + ": " + error;
-	};
-}
+	function BadFormatException(data, byte, error) {
+		this.data = data;
+		this.byte = byte; // Indexed from 0
+		this.error = error;
+		this.toString = function() {
+			return "Unexpected value when reading near byte " + byte + ": " + error;
+		};
+	}
 
-function UnsupportedFeatureException(data, byte, feature, error) {
-	this.data = data;
-	this.byte = byte
-	this.error = error;
-	this.feature = feature;
-	this.toString = function() {
-		return "The MAT file has features that are not supported. See Limitations on the project's page: " + error;
-	};
+	function UnsupportedFeatureException(data, byte, feature, error) {
+		this.data = data;
+		this.byte = byte
+		this.error = error;
+		this.feature = feature;
+		this.toString = function() {
+			return "The MAT file has features that are not supported. See Limitations on the project's page: " + error;
+		};
+	}
 }
