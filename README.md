@@ -32,12 +32,12 @@ S.cell = {1 2; 3 4}
 S.fruit = 'apple'
 ```
 In JavaScript
-```
+```js
 S.cell[1][0] == 3
 S.fruit == "apple"
 ```
 But for one constructed with `S = struct('cell', {1 2; 3 4}, 'fruit', 'apple')` (non-scalar):
-```
+```js
 S[1][0].cell == 3
 S[1][1].cell == 4
 S[1][0].fruit == "apple"
