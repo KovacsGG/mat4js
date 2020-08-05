@@ -1,0 +1,31 @@
+{
+  "name": "mat4js",
+  "version": "1.0.0",
+  "description": "Converts Matlab Level 5 MAT-files to JavaSript objects",
+  "main": "readmat.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KovacsGG/mat4js.git"
+  },
+  "keywords": [
+    "matlab",
+    "mat-file"
+  ],
+  "author": "Kovács Gellért Gábor",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/KovacsGG/mat4js/issues"
+  },
+  "homepage": "https://github.com/KovacsGG/mat4js#readme",
+  "dependencies": {
+    "pako": "file:pako"
+  },
+  "devDependencies": {}
+}

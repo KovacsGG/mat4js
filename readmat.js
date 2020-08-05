@@ -1,4 +1,5 @@
-function readMat(data) {
+var pako = require("pako/lib/inflate");
+export function read(data) {
 	function readDataElem(data, index) {
 		var type, length, taglength;
 		var view = new DataView(data);

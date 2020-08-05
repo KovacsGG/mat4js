@@ -3,14 +3,13 @@ JavaScript library to load Matlab Level 5 MAT-files as JavaScript objects and vi
 Based on the documentation: https://www.mathworks.com/help/pdf_doc/matlab/matfile_format.pdf released for 2019b
 
 ## Installation
-One way is to download `readmat.js` to your webserver and include it in your HTML. As most MAT-files contain zlib compressed data elements, you will also need to download `lib/inflate.js`.
+The recommended way is to download `dist/readmat.min.js` to your webserver and include it in your HTML:
 ```html
 <script type="text/javascript" src="readmat.js"></script>
-<script type="text/javascript" src="lib/inflate.min.js"></script>
 ```
 
 ## Read
-Use `readMat(ArrayBuffer)`.
+Use `mat5.read(ArrayBuffer)`.
 
 It returns a JavaScript object with a `.header` and `.data` property.
 
