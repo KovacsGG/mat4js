@@ -76,7 +76,7 @@ function readMat(data) {
 				return read;
 
 			case 8: // reserved
-				throw new BadFormatException(data, index, "Data element's type is 8, 'Reserved' (unknown)");
+				throw new FormatError(data, index, "Data element's type is 8, 'Reserved' (unknown)");
 
 			case 9: // double
 				var arr = [];
@@ -87,15 +87,15 @@ function readMat(data) {
 				return read;
 
 			case 10: // reserved
-				throw new BadFormatException(data, index, "Data element's type is 10, 'Reserved' (unknown)");
+				throw new FormatError(data, index, "Data element's type is 10, 'Reserved' (unknown)");
 
 			case 11: // reserved
-				throw new BadFormatException(data, index, "Data element's type is 11, 'Reserved' (unknown)");
+				throw new FormatError(data, index, "Data element's type is 11, 'Reserved' (unknown)");
 
 			case 12: // int64
-				throw new UnsupportedFeatureException(data, index, "INT64", "Data element's type is 12, 'INT64' (unsupported)");
+				throw new FeatureError(data, index, "INT64", "Data element's type is 12, 'INT64' (unsupported)");
 			case 13: // uint64
-				throw new UnsupportedFeatureException(data, index, "UINT64", "Data element's type is 13, 'UINT64' (unsupported)");
+				throw new FeatureError(data, index, "UINT64", "Data element's type is 13, 'UINT64' (unsupported)");
 
 			case 14: // matrix
 				var reader = index + taglength;
@@ -219,7 +219,7 @@ function readMat(data) {
 						}
 						break;
 					case 3: // Object
-						throw new UnsupportedFeatureException(data, index, "OBJECT", "Array's type is 3, 'mxOBJECT_CLASS' (unsupported)");
+						throw new FeatureError(data, index, "OBJECT", "Array's type is 3, 'mxOBJECT_CLASS' (unsupported)");
 					case 4: // Character array
 						flat = readDataElem(data, reader);
 						reader += flat.length;
@@ -250,7 +250,7 @@ function readMat(data) {
 						}
 
 						// Sparse arrays can only be two dimensional
-						if (dim.data.length != 2) throw new BadFormatException(data, index, "MATLAB only supports two dimensional sparse arrays, while this sparse array is " + dim.data.length + " dimensional");
+						if (dim.data.length != 2) throw new FormatError(data, index, "MATLAB only supports two dimensional sparse arrays, while this sparse array is " + dim.data.length + " dimensional");
 						arrData = {x: dim.data[1], y: dim.data[0], nz: []};
 
 						for (var i = 0; i < jc.data.length - 1; i++) {
@@ -285,15 +285,15 @@ function readMat(data) {
 						arrData = iterateN(dim.data, flat);
 						break;
 					case 14: // 64-bit, signed integer
-						throw new UnsupportedFeatureException(data, index, "INT64", "Array's type is 14, 'mxINT64_CLASS' (unsupported)");
+						throw new FeatureError(data, index, "INT64", "Array's type is 14, 'mxINT64_CLASS' (unsupported)");
 					case 15: // 64-bit, unsigned integer
-						throw new UnsupportedFeatureException(data, index, "UINT64", "Array's type is 15, 'mxUINT64_CLASS' (unsupported)");
+						throw new FeatureError(data, index, "UINT64", "Array's type is 15, 'mxUINT64_CLASS' (unsupported)");
 					case 16: // undocumented mxFUNCTION_CLASS
 					case 17: // undocumented mxOPAQUE_CLASS
 						// Ignore
 						return read;
 					default:
-						throw new BadFormatException(data, index, "Array's type is " + mxClass + " (unknown)");
+						throw new FormatError(data, index, "Array's type is " + mxClass + " (unknown)");
 				}
 
 
@@ -335,7 +335,7 @@ function readMat(data) {
 				read.data = arr
 				return read;
 			default:
-				throw new BadFormatException(data, index, "Data element's type is " + type + " (unknown)");
+				throw new FormatError(data, index, "Data element's type is " + type + " (unknown)");
 
 		}
 	}
@@ -347,7 +347,7 @@ function readMat(data) {
 	if (endianIndicator == 0x494D) {
 		en = false;
 	} else if (endianIndicator != 0x4D49) {
-		throw new BadFormatException(data, 126, "Expected 0x4D49 for big endian or 0x494D for little endian, but got " + endianIndicator);
+		throw new FormatError(data, 126, "Expected 0x4D49 for big endian or 0x494D for little endian, but got " + endianIndicator);
 	}
 
 	var version = view.getInt16(124, en)
@@ -355,9 +355,9 @@ function readMat(data) {
 		case 0x0100:
 			break;
 		case 0x0200:
-			throw new UnsupportedFeatureException(data, 124, "HDF5", "Matlab v7.3 MAT-files are not supported");
+			throw new FeatureError(data, 124, "HDF5", "Matlab v7.3 MAT-files are not supported");
 		default:
-			throw new BadFormatException(data, 124, "Version identifier " + version + " unknown");
+			throw new FormatError(data, 124, "Version identifier " + version + " unknown");
 	}
 
 	// First 116 bytes is human-readable text field
@@ -390,23 +390,23 @@ function readMat(data) {
 		}
 		return i;
 	}
+}
 
-	function BadFormatException(data, byte, error) {
+class FormatError extends Error {
+	constructor(data, byte, message) {
+		super("Unexpected value when reading near byte " + byte + ": " + message);
+		this.name = "FormatError";
 		this.data = data;
-		this.byte = byte; // Indexed from 0
-		this.error = error;
-		this.toString = function() {
-			return "Unexpected value when reading near byte " + byte + ": " + error;
-		};
+		this.byte = byte;
 	}
+}
 
-	function UnsupportedFeatureException(data, byte, feature, error) {
+class FeatureError extends Error {
+	constructor(data, byte, feature, message) {
+		super("The MAT file has features that are not supported. See Limitations on the project's page: " + message);
+		this.name = "FeatureError";
 		this.data = data;
-		this.byte = byte
-		this.error = error;
+		this.byte = byte;
 		this.feature = feature;
-		this.toString = function() {
-			return "The MAT file has features that are not supported. See Limitations on the project's page: " + error;
-		};
 	}
 }

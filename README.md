@@ -52,6 +52,6 @@ Sparse arrays are converted to objects with `.x` and `.y` properties describing 
 ## Limitaions
 There is no support for 64-bit data or array types and Object array types.
 
-Matlab v7.3 MAT-files use HDF5 data structure and are not supported. Such files will raise an `UnsupportedFeatureException` with the `.feature` property set to `"HDF5"`. There are other JavaScript projects to view HDF5 files: https://github.com/usnistgov/jsfive
+Matlab v7.3 MAT-files use HDF5 data structure and are not supported. Reading such files will throw a `FeatureError` with the `.feature` property set to `"HDF5"`. There are other JavaScript projects to view HDF5 files: https://github.com/usnistgov/jsfive
 
 There is no write functionality.
