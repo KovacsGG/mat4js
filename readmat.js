@@ -1,11 +1,16 @@
 var pako = require("pako/lib/inflate");
+
 export function read(data) {
 	function readDataElem(data, index) {
 		var type, length, taglength;
 		var view = new DataView(data);
 
 
-		// Checking the first two bytes for 0 (as per the docs) should not work, because 1) length and type are not reversed as they shoud be for the small format, 2) length can be 0. This creates ambiguity as to the length of the tag. However, whith the 64 bit padding considered, small and long format data tags with 0 length data are identical.
+		// Checking the first two bytes for 0 (as per the docs) should not work, because
+		// 1) length and type are not reversed as they should be for the small format,
+		// 2) length can be 0. This creates ambiguity as to the length of the tag.
+		// However, with the 64 bit padding considered, small and long format data tags
+		// with 0 length data are identical.
 		var longFormatFlag = false;
 		if (view.getInt32(index, en) >>> 16 == 0) {
 			longFormatFlag = true;
@@ -15,7 +20,8 @@ export function read(data) {
 			length = view.getInt32(index + 4, en);
 			taglength = 8;
 		} else {
-			// According to the specification these should be in the reverse order, but the files that I've seen do not follow the specification.
+			// According to the specification these should be in the reverse order, but
+			// the files that I've seen do not follow the specification.
 			type = view.getInt16(index, en);
 			length = view.getInt16(index + 2, en);
 			taglength = 4;
@@ -94,9 +100,28 @@ export function read(data) {
 				throw new FormatError(data, index, "Data element's type is 11, 'Reserved' (unknown)");
 
 			case 12: // int64
-				throw new FeatureError(data, index, "INT64", "Data element's type is 12, 'INT64' (unsupported)");
+				if (view.getBigInt64 === undefined) {
+					throw new FeatureError(data, index, "INT64", "Data element's type is 12, 'INT64' (unsupported)");
+				}
+
+				var arr = [];
+				for (var i = 0; i < length / 8; i++) {
+					arr.push(view.getBigInt64(index + taglength + i * 8, en));
+				}
+				read.data = arr
+				return read;					
+
 			case 13: // uint64
-				throw new FeatureError(data, index, "UINT64", "Data element's type is 13, 'UINT64' (unsupported)");
+				if (view.getBigInt64 === undefined) {
+					throw new FeatureError(data, index, "UINT64", "Data element's type is 13, 'UINT64' (unsupported)");
+				}
+
+				var arr = [];
+				for (var i = 0; i < length / 8; i++) {
+					arr.push(view.getBigUint64(index + taglength + i * 8, en));
+				}
+				read.data = arr
+				return read;					
 
 			case 14: // matrix
 				var reader = index + taglength;
@@ -268,6 +293,8 @@ export function read(data) {
 					case 11: // 16-bit, unsigned integer
 					case 12: // 32-bit, signed integer
 					case 13: // 32-bit, unsigned integer
+					case 14: // 64-bit, signed integer
+					case 15: // 64-bit, unsigned integer
 						var flat = [];
 						if (realFlag) {
 							var pr = readDataElem(data, reader);
@@ -285,10 +312,6 @@ export function read(data) {
 						}
 						arrData = iterateN(dim.data, flat);
 						break;
-					case 14: // 64-bit, signed integer
-						throw new FeatureError(data, index, "INT64", "Array's type is 14, 'mxINT64_CLASS' (unsupported)");
-					case 15: // 64-bit, unsigned integer
-						throw new FeatureError(data, index, "UINT64", "Array's type is 15, 'mxUINT64_CLASS' (unsupported)");
 					case 16: // undocumented mxFUNCTION_CLASS
 					case 17: // undocumented mxOPAQUE_CLASS
 						// Ignore
@@ -296,8 +319,6 @@ export function read(data) {
 					default:
 						throw new FormatError(data, index, "Array's type is " + mxClass + " (unknown)");
 				}
-
-
 
 				read.name = name;
 				read.data = arrData;
