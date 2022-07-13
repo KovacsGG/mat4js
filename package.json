@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "build": "browserify readmat.js | uglifyjs > dist/readmat.min.js",
+    "build": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
