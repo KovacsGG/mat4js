@@ -2,7 +2,7 @@
   "name": "mat4js",
   "version": "1.0.1",
   "description": "Converts Matlab Level 5 MAT-files to JavaSript objects",
-  "main": "readmat.js",
+  "main": "lib/index.js",
   "type": "module",
   "files": [
     "lib"
