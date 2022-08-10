@@ -11,12 +11,12 @@ $ npm install mat4js
 then use as
 
 ```js
-import { read as readmat } from "mat4js"
+import { read as readmat } from "mat-for-js"
 readmat(ArrayBuffer)
 ```
 
 ```js
-import * from "mat4js"
+import * from "mat-for-js"
 mat4js.read(ArrayBuffer)
 ```
 

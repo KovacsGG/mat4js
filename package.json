@@ -1,5 +1,5 @@
 {
-  "name": "mat4js",
+  "name": "mat-for-js",
   "version": "1.0.1",
   "description": "Converts Matlab Level 5 MAT-files to JavaSript objects",
   "main": "lib/index.js",
