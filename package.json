@@ -1,14 +1,16 @@
 {
   "name": "mat4js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Converts Matlab Level 5 MAT-files to JavaSript objects",
   "main": "readmat.js",
-  "directories": {
-    "lib": "lib",
-    "test": "test"
-  },
+  "type": "module",
+  "files": [
+    "lib"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack --config webpack.config.cjs",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "lint": "eslint ./lib --fix"
   },
   "repository": {
     "type": "git",
@@ -27,5 +29,7 @@
   "dependencies": {
     "pako": "^1.0.11"
   },
-  "devDependencies": {}
+    "jest": "^28.1.3",
+    "webpack-cli": "^4.10.0"
+  }
 }
