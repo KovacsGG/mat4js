@@ -21,7 +21,8 @@
     "matlab",
     "mat-file"
   ],
-  "author": "Kovács Gellért Gábor",
+  "author": "Kovács Gellért Gábor <kovacsgellertgabor@gmai.com> (https://kgello.me)",
+  "contributors": ["Seairth Jacobs <sjacobs@wrsystems.com>"],
   "license": "GPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/KovacsGG/mat4js/issues"
