@@ -8,8 +8,8 @@
     "lib"
   ],
   "scripts": {
-    "build": "webpack -c ./webpack.dev.config.cjs; webpack -c ./webpack.prod.config.cjs",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "build": "webpack",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest",
     "itest": "xdg-open ./test/test.html",
     "lint": "eslint ./lib ./test --fix"
   },
