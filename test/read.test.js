@@ -48,7 +48,7 @@ describe("handling matlab types", () => {
 	
 	test("mxUINT64", () => {
 		const obj = matread(files["mxUINT64.mat"])
-		expect(obj.data).toEqual({mxUINT64: [2, 3, 5]})
+		expect(obj.data).toEqual({mxUINT64: [2n, 3n, 5n]})
 	})
 	
 	test("mxSINGLE", () => {
