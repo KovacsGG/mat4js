@@ -5,7 +5,12 @@ Based on the documentation: https://www.mathworks.com/help/pdf_doc/matlab/matfil
 ## Installation
 ### via npm
 ```
-$ npm install mat4js
+$ npm install mat-for-js
+```
+
+### via pnpm
+```
+$ pnpm add mat-for-js
 ```
 
 then use as
