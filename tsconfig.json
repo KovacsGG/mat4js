@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "outDir": "./lib",
+        "allowJs": true,
+        "target": "ES6",
+        "lib": ["ES2022"],
+        "moduleResolution": "Bundler",
+
+        "noImplicitReturns": true
+    },
+    "include": ["./src/**/*"],
+    
+}
