@@ -30,7 +30,7 @@ enum CLASS {
     mxUINT64_CLASS,
 }
 
-export class miMATRIX extends Data {
+export default class miMATRIX extends Data {
     flagsSE: Element
     dimensionsSE: Element
     nameSE: Element

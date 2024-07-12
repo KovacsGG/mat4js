@@ -4,7 +4,7 @@ import {unzip, deflate} from "zlib"
 
 import { Element } from "./element.js"
 
-export abstract class Data {
+abstract class Data {
     view: DataView
     length: number
     element: Element
@@ -31,7 +31,7 @@ abstract class SimpleData extends Data {
     }
 }
 
-export abstract class NumericData extends SimpleData {
+abstract class NumericData extends SimpleData {
     _value: number[]
     get value() {
         return this._value || Array.from(this)
@@ -112,23 +112,22 @@ export class miCOMPRESSED extends Data {
     }
 }
 
-import { miMATRIX } from "./matrix.js"
+import miMATRIX from "./matrix.js"
 
-export const TYPE = [miINT8,
-    miUINT8,
-    miINT16,
-    miUINT16,
-    miINT32,
-    miUINT32,
-    miSINGLE,
-    undefined,
-    miDOUBLE,
-    undefined,
-    undefined,
-    miINT64,
-    miUINT64,
-    miMATRIX,
-    miCOMPRESSED,
-    miUTF8,
-    miUTF16,
-    miUTF32]
+export { miMATRIX }
+
+export type DataType = typeof miINT8
+	|typeof miUINT8
+	|typeof miINT16
+	|typeof miUINT16
+	|typeof miINT32
+	|typeof miUINT32
+	|typeof miSINGLE
+	|typeof miDOUBLE
+	|typeof miINT64
+	|typeof miUINT64
+	|typeof miMATRIX
+	|typeof miCOMPRESSED
+	|typeof miUTF8
+	|typeof miUTF16
+	|typeof miUTF32

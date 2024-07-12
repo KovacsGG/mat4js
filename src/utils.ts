@@ -5,6 +5,5 @@ export function readString(from: DataView, length: number, offset = 0,
 }
 
 export function round8byte(index: number) {
-    if (index % 8 == 0) return index
-    return index + 8 - index % 8
+    return (index + 7) & (~7)
 }
