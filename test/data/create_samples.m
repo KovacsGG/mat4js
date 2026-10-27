@@ -1,6 +1,6 @@
 samples = ["mxSINGLE", "mxDOUBLE", "mxINT8", "mxUINT8", ...
     "mxINT16", "mxUINT16", "mxINT32", "mxUINT32", ...
-    "mxINT64", "mxUINT64", "mxCHAR", ...
+    "mxINT64", "mxUINT64", "mxCHAR", "mxCHAR_unicode", ...
     "mxCELL", "mxSTRUCT1", "mxSTRUCT2", "mxSPARSE", ...
     "LOGICAL"];
 
@@ -17,6 +17,7 @@ mxUINT64 = uint64([2, 3, 5]);
 
 global mxCHAR;
 mxCHAR = 'abc';
+mxCHAR_unicode = '你好，こんにちは，안녕하세요🙂';
 
 utf8_bytes = unicode2native('UTF-8', "UTF-8");
 utf16_bytes = unicode2native('UTF-16', "UTF-16");
@@ -29,6 +30,9 @@ mxCELL = {utf8, utf16, utf32};
 mxSTRUCT1.alpha = 'num';
 mxSTRUCT1.num_123 = [1, 2, 3];
 mxSTRUCT2 = struct;
+
+% mxCHAR_utf8/mxCHAR_utf32 are hand crafted (see test/read.test.js), MATLAB
+% always saves non-ASCII char arrays as miUTF16.
 
 %mxOBJECT
 

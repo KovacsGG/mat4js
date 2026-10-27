@@ -66,6 +66,21 @@ describe("handling matlab types", () => {
 		expect(obj.data).toEqual({mxCHAR: "abc"})
 	})
 
+	test("mxCHAR utf16, Chinese/Japanese/Korean text", () => {
+		const obj = matread(files["mxCHAR_unicode.mat"])
+		expect(obj.data).toEqual({mxCHAR_unicode: "你好，こんにちは，안녕하세요\u{1F642}"})
+	})
+
+	test("mxCHAR utf8, Chinese/Japanese/Korean text (hand crafted)", () => {
+		const obj = matread(files["mxCHAR_utf8.mat"])
+		expect(obj.data).toEqual({mxCHAR_utf8: "你好，こんにちは，안녕하세요\u{1F642}"})
+	})
+
+	test("mxCHAR utf32, Chinese/Japanese/Korean text (hand crafted)", () => {
+		const obj = matread(files["mxCHAR_utf32.mat"])
+		expect(obj.data).toEqual({mxCHAR_utf32: "你好，こんにちは，안녕하세요\u{1F642}"})
+	})
+
 	test("mxCELL", () => {
 		const obj = matread(files["mxCELL.mat"])
 		expect(obj.data).toEqual({mxCELL: ["UTF-8", "UTF-16", "UTF-32"]})
